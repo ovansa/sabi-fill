@@ -1,0 +1,31 @@
+{
+	"name": "sabi-fill",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"build": "vite build && npm run copy-assets",
+		"build:firefox": "vite build && npm run copy-assets:firefox",
+		"copy-assets": "cp manifest.json dist/ && cp public/icon.png dist/",
+		"copy-assets:firefox": "cp manifest-firefox.json dist/manifest.json && cp public/icon.png dist/ && cp node_modules/webextension-polyfill/dist/browser-polyfill.js dist/browser-polyfill.js",
+		"dev": "vite build --watch",
+		"firefox:run": "web-ext run --source-dir dist --firefox firefox-developer-edition --keep-profile-changes=false",
+		"firefox:build": "web-ext build --source-dir dist --artifacts-dir web-ext-artifacts --overwrite-dest",
+		"firefox:dev": "npm run build:firefox && npm run firefox:run"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"type": "commonjs",
+	"devDependencies": {
+		"@types/firefox-webext-browser": "^120.0.4",
+		"@types/webextension-polyfill": "^0.12.3",
+		"typescript": "^5.8.3",
+		"vite": "^7.0.0",
+		"vite-plugin-static-copy": "^3.1.0",
+		"web-ext": "^8.8.0"
+	},
+	"dependencies": {
+		"webextension-polyfill": "^0.12.0"
+	}
+}

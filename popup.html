@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+
+			body {
+				width: 220px;
+				min-height: 280px;
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+					sans-serif;
+				background: #f8f9fa;
+				color: #333;
+			}
+
+			.header {
+				padding: 15px;
+				text-align: center;
+				background: #fff;
+				border-bottom: 1px solid #e9ecef;
+			}
+
+			.header h1 {
+				font-size: 18px;
+				font-weight: 500;
+				margin-bottom: 3px;
+				color: #333;
+			}
+
+			.header p {
+				font-size: 11px;
+				color: #666;
+			}
+
+			.content {
+				padding: 15px;
+			}
+
+			.fill-button {
+				width: 100%;
+				padding: 12px;
+				background: #007bff;
+				color: white;
+				border: none;
+				font-size: 14px;
+				font-weight: 500;
+				cursor: pointer;
+				transition: background-color 0.2s ease;
+			}
+
+			.fill-button:hover {
+				background: #0056b3;
+			}
+
+			.fill-button:disabled {
+				opacity: 0.6;
+				cursor: not-allowed;
+			}
+
+			.status {
+				margin-top: 12px;
+				padding: 8px;
+				font-size: 12px;
+				text-align: center;
+				border: 1px solid #e9ecef;
+			}
+
+			.status-ready {
+				background: #f8f9fa;
+				color: #666;
+			}
+
+			.status-info {
+				background: #e3f2fd;
+				color: #1976d2;
+				border-color: #bbdefb;
+			}
+
+			.status-success {
+				background: #e8f5e8;
+				color: #388e3c;
+				border-color: #c8e6c9;
+			}
+
+			.status-error {
+				background: #ffebee;
+				color: #d32f2f;
+				border-color: #ffcdd2;
+			}
+
+			.settings-row {
+				display: flex;
+				gap: 8px;
+				margin-top: 12px;
+			}
+
+			.settings-button {
+				flex: 1;
+				padding: 8px;
+				background: #fff;
+				color: #333;
+				border: 1px solid #e9ecef;
+				font-size: 11px;
+				cursor: pointer;
+				transition: background-color 0.2s ease;
+			}
+
+			.settings-button:hover {
+				background: #f8f9fa;
+			}
+
+			.stats {
+				margin-top: 12px;
+				padding: 10px;
+				background: #fff;
+				border: 1px solid #e9ecef;
+			}
+
+			.stats h3 {
+				font-size: 11px;
+				margin-bottom: 6px;
+				color: #333;
+			}
+
+			.stat-item {
+				display: flex;
+				justify-content: space-between;
+				font-size: 10px;
+				margin-bottom: 3px;
+				color: #666;
+			}
+
+			.version {
+				text-align: center;
+				font-size: 9px;
+				color: #999;
+				margin-top: 12px;
+			}
+
+			.loading {
+				animation: pulse 1.5s ease-in-out infinite;
+			}
+
+			@keyframes pulse {
+				0% {
+					opacity: 1;
+				}
+				50% {
+					opacity: 0.5;
+				}
+				100% {
+					opacity: 1;
+				}
+			}
+
+			.icon {
+				width: 16px;
+				height: 16px;
+				margin-right: 8px;
+				vertical-align: middle;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="header">
+			<h1>🎯 Sabi Fill</h1>
+			<p>Smart Form Filler for Testing</p>
+		</div>
+
+		<div class="content">
+			<button id="fill" class="fill-button">
+				<span class="icon">⚡</span>Fill Form
+			</button>
+
+			<div id="status" class="status status-ready">Ready to fill forms</div>
+
+			<div class="settings-row">
+				<button id="settings" class="settings-button">
+					<span class="icon">⚙️</span>Settings
+				</button>
+				<button id="history" class="settings-button">
+					<span class="icon">📊</span>Stats
+				</button>
+			</div>
+
+			<div class="stats" id="stats-panel" style="display: none">
+				<h3>📈 Session Stats</h3>
+				<div class="stat-item">
+					<span>Forms Filled:</span>
+					<span id="forms-count">0</span>
+				</div>
+				<div class="stat-item">
+					<span>Fields Filled:</span>
+					<span id="fields-count">0</span>
+				</div>
+				<div class="stat-item">
+					<span>Success Rate:</span>
+					<span id="success-rate">100%</span>
+				</div>
+			</div>
+
+			<div class="version">v1.0 - Made with ❤️ for developers</div>
+		</div>
+
+		<script src="popup.js"></script>
+	</body>
+</html>
