@@ -16,7 +16,7 @@
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
-	"type": "commonjs",
+	"type": "module",
 	"devDependencies": {
 		"@types/firefox-webext-browser": "^120.0.4",
 		"@types/webextension-polyfill": "^0.12.3",

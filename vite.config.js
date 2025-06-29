@@ -27,7 +27,7 @@ export default defineConfig({
 			targets: [
 				{ src: 'popup.html', dest: '.' },
 				{ src: 'public/icon.png', dest: '.' },
-				{ src: 'manifest.json', dest: '.' },
+				// { src: 'manifest.json', dest: '.' },
 				{
 					src: 'node_modules/webextension-polyfill/dist/browser-polyfill.js',
 					dest: '.',
