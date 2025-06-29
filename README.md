@@ -1,8 +1,3 @@
-Here's a clean and professional `README.md` for your GitHub repo: [https://github.com/ovansa/sabi-fill](https://github.com/ovansa/sabi-fill), tailored for contributors, testers, and store reviewers.
-
----
-
-````markdown
 # 🔥 Sabi Fill
 
 **Sabi Fill** is a lightweight browser extension that auto-fills web forms with fake test data. It’s built for developers and testers who need to quickly populate input fields without reaching for mock data generators or typing repetitive values.
@@ -28,6 +23,7 @@ Here's a clean and professional `README.md` for your GitHub repo: [https://githu
 git clone https://github.com/ovansa/sabi-fill.git
 cd sabi-fill
 ```
+
 ````
 
 ### 2. Install dependencies
@@ -137,3 +133,4 @@ MIT
 ```
 
 ```
+````
