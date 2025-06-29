@@ -24,8 +24,6 @@ git clone https://github.com/ovansa/sabi-fill.git
 cd sabi-fill
 ```
 
-````
-
 ### 2. Install dependencies
 
 ```bash
@@ -98,7 +96,7 @@ sabi-fill/
 
 ---
 
-## 📸 Screenshots
+<!-- ## 📸 Screenshots
 
 <p align="center">
   <img src="docs/sabi-fill-example.gif" width="400" alt="Sabi Fill in action" />
@@ -118,19 +116,4 @@ sabi-fill/
 - Visit [addons.mozilla.org/developers](https://addons.mozilla.org/en-US/developers/)
 - Upload the same zip or use `web-ext sign` for automated submission
 
----
-
-## 🙌 Credits
-
-Made with 💻 by [Muhammed Ibrahim (ovansa)](https://github.com/ovansa)
-
----
-
-## 📜 License
-
-MIT
-
-```
-
-```
-````
+--- -->
