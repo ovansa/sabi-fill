@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*' # only build on version tags like v1.0.1
 
+permissions:
+  contents: write # Required for release uploads
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,7 +38,7 @@ jobs:
 
       - name: Lint Firefox package
         run: |
-          npm i -g web-ext
+          npm i -g web-ext@7.7.0
           npm run lint:firefox
 
       - name: Upload Chrome ZIP
@@ -50,10 +53,12 @@ jobs:
           name: sabi-fill-firefox
           path: sabi-fill-firefox.zip
 
-      - name: Upload to GitHub Release (optional)
+      - name: Upload to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
           files: |
             sabi-fill-chrome.zip
             sabi-fill-firefox.zip
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Explicitly pass token
