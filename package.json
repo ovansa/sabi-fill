@@ -11,7 +11,8 @@
 		"dev": "vite build --watch",
 		"firefox:run": "web-ext run --source-dir dist --firefox firefox-developer-edition --keep-profile-changes=false",
 		"firefox:build": "web-ext build --source-dir dist --artifacts-dir web-ext-artifacts --overwrite-dest",
-		"firefox:dev": "npm run build:firefox && npm run firefox:run"
+		"firefox:dev": "npm run build:firefox && npm run firefox:run",
+		"lint:firefox": "npm run build:firefox && web-ext lint --source-dir dist"
 	},
 	"keywords": [],
 	"author": "",

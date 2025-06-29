@@ -1,0 +1,59 @@
+name: Build and Package Extension
+
+on:
+  push:
+    tags:
+      - 'v*' # only build on version tags like v1.0.1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Chrome version
+        run: |
+          npm run build
+          cd dist
+          zip -r ../sabi-fill-chrome.zip .
+
+      - name: Build Firefox version
+        run: |
+          npm run build:firefox
+          cd dist
+          zip -r ../sabi-fill-firefox.zip .
+
+      - name: Lint Firefox package
+        run: |
+          npm i -g web-ext
+          npm run lint:firefox
+
+      - name: Upload Chrome ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: sabi-fill-chrome
+          path: sabi-fill-chrome.zip
+
+      - name: Upload Firefox ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: sabi-fill-firefox
+          path: sabi-fill-firefox.zip
+
+      - name: Upload to GitHub Release (optional)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            sabi-fill-chrome.zip
+            sabi-fill-firefox.zip
