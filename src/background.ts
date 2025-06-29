@@ -1,38 +1,28 @@
-const browserAPI = (globalThis as any).browser || (globalThis as any).chrome;
+// ==================== background.ts (Main Entry Point) ====================
 
-console.log('[SharpFilla] Background script loaded');
+import { BackgroundManager } from './core/background-manager';
+import { BackgroundLogger } from './utils/background-logger';
 
-// Check if storage API is available
-if (!browserAPI || !browserAPI.storage || !browserAPI.storage.sync) {
-	console.error('[SharpFilla] Storage API not available');
-	throw new Error('Browser storage API not available');
-}
+// Global error handling
+const handleGlobalError = (error: Error | ErrorEvent): void => {
+  BackgroundLogger.error('Global background error:', error);
+};
 
-browserAPI.runtime.onInstalled.addListener(() => {
-	console.log('[SharpFilla] Extension installed');
-
-	// Set default configuration with error handling
-	browserAPI.storage.sync
-		.set({
-			config: {
-				animationSpeed: 'medium',
-				visualFeedback: true,
-				skipHiddenFields: true,
-				respectRequiredOnly: false,
-				currentProfile: 'Default Professional',
-			},
-		})
-		.then(() => {
-			console.log('[SharpFilla] Default config saved');
-		})
-		.catch((error: any) => {
-			console.error('[SharpFilla] Failed to save config:', error);
-		});
-});
-
-browserAPI.runtime.onMessage.addListener(
-	(message: any, sender: any, sendResponse: any) => {
-		console.log('[SharpFilla] Background received message:', message);
-		sendResponse({ status: 'received' });
-	}
+// Set up global error handlers
+globalThis.addEventListener('error', handleGlobalError);
+globalThis.addEventListener(
+  'unhandledrejection',
+  (event: PromiseRejectionEvent) => {
+    BackgroundLogger.error('Unhandled promise rejection:', event.reason);
+  }
 );
+
+// Initialize the background manager
+try {
+  const backgroundManager = new BackgroundManager();
+  backgroundManager.init();
+  BackgroundLogger.info('Background script loaded successfully');
+} catch (error) {
+  BackgroundLogger.error('Critical background script failure:', error);
+  throw error;
+}
