@@ -114,6 +114,12 @@
 				background: #f8f9fa;
 			}
 
+			.settings-button.active {
+				background: #007bff;
+				color: white;
+				border-color: #007bff;
+			}
+
 			.stats {
 				margin-top: 12px;
 				padding: 10px;
@@ -133,6 +139,70 @@
 				font-size: 10px;
 				margin-bottom: 3px;
 				color: #666;
+			}
+
+			.settings-panel {
+				margin-top: 12px;
+				padding: 10px;
+				background: #fff;
+				border: 1px solid #e9ecef;
+				display: none;
+			}
+
+			.settings-panel h3 {
+				font-size: 11px;
+				margin-bottom: 8px;
+				color: #333;
+			}
+
+			.form-group {
+				margin-bottom: 8px;
+			}
+
+			.form-group label {
+				display: block;
+				font-size: 10px;
+				margin-bottom: 3px;
+				color: #666;
+			}
+
+			.form-group input {
+				width: 100%;
+				padding: 6px;
+				font-size: 11px;
+				border: 1px solid #e9ecef;
+				border-radius: 3px;
+				background: #fff;
+			}
+
+			.form-group input:focus {
+				outline: none;
+				border-color: #007bff;
+			}
+
+			.form-group input::placeholder {
+				color: #999;
+			}
+
+			.save-button {
+				width: 100%;
+				padding: 6px;
+				background: #28a745;
+				color: white;
+				border: none;
+				font-size: 10px;
+				cursor: pointer;
+				border-radius: 3px;
+				margin-top: 5px;
+			}
+
+			.save-button:hover {
+				background: #218838;
+			}
+
+			.save-button:disabled {
+				opacity: 0.6;
+				cursor: not-allowed;
 			}
 
 			.version {
@@ -164,6 +234,28 @@
 				margin-right: 8px;
 				vertical-align: middle;
 			}
+
+			.help-text {
+				font-size: 9px;
+				color: #999;
+				margin-top: 2px;
+			}
+
+			.back-button {
+				width: 100%;
+				padding: 6px;
+				background: #6c757d;
+				color: white;
+				border: none;
+				font-size: 10px;
+				cursor: pointer;
+				border-radius: 3px;
+				margin-top: 5px;
+			}
+
+			.back-button:hover {
+				background: #5a6268;
+			}
 		</style>
 	</head>
 	<body>
@@ -173,35 +265,68 @@
 		</div>
 
 		<div class="content">
-			<button id="fill" class="fill-button">
-				<span class="icon">⚡</span>Fill Form
-			</button>
-
-			<div id="status" class="status status-ready">Ready to fill forms</div>
-
-			<div class="settings-row">
-				<button id="settings" class="settings-button">
-					<span class="icon">⚙️</span>Settings
+			<div id="main-panel">
+				<button id="fill" class="fill-button">
+					<span class="icon">⚡</span>Fill Form
 				</button>
-				<button id="history" class="settings-button">
-					<span class="icon">📊</span>Stats
-				</button>
+
+				<div id="status" class="status status-ready">Ready to fill forms</div>
+
+				<div class="settings-row">
+					<button id="settings" class="settings-button">
+						<span class="icon">⚙️</span>Settings
+					</button>
+					<button id="history" class="settings-button">
+						<span class="icon">📊</span>Stats
+					</button>
+				</div>
+
+				<div class="stats" id="stats-panel" style="display: none">
+					<h3>📈 Session Stats</h3>
+					<div class="stat-item">
+						<span>Forms Filled:</span>
+						<span id="forms-count">0</span>
+					</div>
+					<div class="stat-item">
+						<span>Fields Filled:</span>
+						<span id="fields-count">0</span>
+					</div>
+					<div class="stat-item">
+						<span>Success Rate:</span>
+						<span id="success-rate">100%</span>
+					</div>
+				</div>
 			</div>
 
-			<div class="stats" id="stats-panel" style="display: none">
-				<h3>📈 Session Stats</h3>
-				<div class="stat-item">
-					<span>Forms Filled:</span>
-					<span id="forms-count">0</span>
+			<div class="settings-panel" id="settings-panel">
+				<h3>⚙️ Custom Settings</h3>
+
+				<div class="form-group">
+					<label for="email-domain">Email Domain:</label>
+					<input
+						type="text"
+						id="email-domain"
+						placeholder="gmail.com"
+						value="gmail.com"
+					/>
+					<div class="help-text">Default domain for generated emails</div>
 				</div>
-				<div class="stat-item">
-					<span>Fields Filled:</span>
-					<span id="fields-count">0</span>
+
+				<div class="form-group">
+					<label for="custom-password">Custom Password:</label>
+					<input
+						type="password"
+						id="custom-password"
+						placeholder="Leave blank for random"
+					/>
+					<div class="help-text">
+						Use same password for all forms (min 8 chars)
+					</div>
 				</div>
-				<div class="stat-item">
-					<span>Success Rate:</span>
-					<span id="success-rate">100%</span>
-				</div>
+
+				<button id="save-settings" class="save-button">💾 Save Settings</button>
+
+				<button id="back-to-main" class="back-button">← Back</button>
 			</div>
 
 			<div class="version">v1.0 - Made with ❤️ for developers</div>

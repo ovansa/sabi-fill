@@ -1,15 +1,15 @@
 const browserAPI = (globalThis as any).browser || (globalThis as any).chrome;
 
-console.log('[SharpFilla] Background script loaded');
+console.log('[SabiFill] Background script loaded');
 
 // Check if storage API is available
 if (!browserAPI || !browserAPI.storage || !browserAPI.storage.sync) {
-	console.error('[SharpFilla] Storage API not available');
+	console.error('[SabiFill] Storage API not available');
 	throw new Error('Browser storage API not available');
 }
 
 browserAPI.runtime.onInstalled.addListener(() => {
-	console.log('[SharpFilla] Extension installed');
+	console.log('[SabiFill] Extension installed');
 
 	// Set default configuration with error handling
 	browserAPI.storage.sync
@@ -23,16 +23,16 @@ browserAPI.runtime.onInstalled.addListener(() => {
 			},
 		})
 		.then(() => {
-			console.log('[SharpFilla] Default config saved');
+			console.log('[SabiFill] Default config saved');
 		})
 		.catch((error: any) => {
-			console.error('[SharpFilla] Failed to save config:', error);
+			console.error('[SabiFill] Failed to save config:', error);
 		});
 });
 
 browserAPI.runtime.onMessage.addListener(
 	(message: any, sender: any, sendResponse: any) => {
-		console.log('[SharpFilla] Background received message:', message);
+		console.log('[SabiFill] Background received message:', message);
 		sendResponse({ status: 'received' });
 	}
 );

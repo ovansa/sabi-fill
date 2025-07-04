@@ -1,11 +1,16 @@
 // content.ts
 import FakeDataGenerator, { FakeDataSet } from './data-generator';
 
+interface FillOptions {
+	override?: boolean;
+}
+
 interface FillResponse {
 	status: 'success' | 'error';
 	message: string;
 	fieldsFilled: number;
 	errors?: string[];
+	fillOptions?: FillOptions | {};
 }
 
 class FormFiller {
@@ -18,12 +23,17 @@ class FormFiller {
 
 	constructor() {
 		this.browser = (globalThis as any).browser || (globalThis as any).chrome;
-		this.fakeData = FakeDataGenerator.generate();
-		console.log('[SharpFilla] Generated fake data:', this.fakeData);
+		this.fakeData = {} as FakeDataSet;
+		console.log('[SabiFill] Generated fake data:', this.fakeData);
 	}
 
-	async fillAllInputs(): Promise<FillResponse> {
-		console.log('[SharpFilla] Starting form fill process...');
+	async fillAllInputs(options: FillOptions = {}): Promise<FillResponse> {
+		console.log('[SabiFill] Starting form fill process...', { options });
+
+		// Generate new fake data each time
+		this.fakeData = await FakeDataGenerator.generate();
+		console.log('[SabiFill] Generated new fake data:', this.fakeData);
+
 		this.filledFields = 0;
 		this.errors = [];
 
@@ -31,25 +41,27 @@ class FormFiller {
 			// Add a small delay to ensure page is fully loaded
 			await this.delay(500);
 
-			this.fillByLabels();
-			this.fillTextInputs();
-			this.fillSelects();
-			this.fillCustomSelects();
-			this.fillRadioButtons();
-			this.fillCheckboxes();
-			this.fillTextareas();
+			this.fillByLabels(options.override);
+			this.fillTextInputs(options.override);
+			this.fillSelects(options.override);
+			this.fillCustomSelects(options.override);
+			this.fillRadioButtons(options.override);
+			this.fillCheckboxes(options.override);
+			this.fillTextareas(options.override);
 
-			console.log(`[SharpFilla] Filled ${this.filledFields} fields`);
+			console.log(`[SabiFill] Filled ${this.filledFields} fields`);
 			return {
 				status: 'success',
+				fillOptions: options,
 				message: `Filled ${this.filledFields} fields successfully`,
 				fieldsFilled: this.filledFields,
 				errors: this.errors.length > 0 ? this.errors : undefined,
 			};
 		} catch (error) {
-			console.error('[SharpFilla] Error:', error);
+			console.error('[SabiFill] Error:', error);
 			return {
 				status: 'error',
+				fillOptions: options,
 				message: 'Failed to fill form',
 				fieldsFilled: this.filledFields,
 				errors: [
@@ -64,8 +76,8 @@ class FormFiller {
 		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
-	private fillByLabels(): void {
-		console.log('[SharpFilla] Filling by labels...');
+	private fillByLabels(override = false): void {
+		console.log('[SabiFill] Filling by labels...');
 
 		// Find all labels and their associated form elements
 		const labels = document.querySelectorAll('label');
@@ -73,7 +85,7 @@ class FormFiller {
 		labels.forEach((label) => {
 			try {
 				const labelText = label.textContent?.toLowerCase().trim() || '';
-				console.log('[SharpFilla] Processing label:', labelText);
+				console.log('[SabiFill] Processing label:', labelText);
 
 				// Find the associated form element
 				let formElement: HTMLElement | null = null;
@@ -113,7 +125,10 @@ class FormFiller {
 					}
 				}
 
-				if (formElement && !formElement.hasAttribute('data-filled')) {
+				if (formElement) {
+					if (!override && formElement?.hasAttribute('data-filled')) {
+						return;
+					}
 					this.fillElementByLabel(formElement, labelText);
 					formElement.setAttribute('data-filled', 'true');
 				}
@@ -132,9 +147,14 @@ class FormFiller {
 			if (tagName === 'input') {
 				const input = element as HTMLInputElement;
 				const value = this.getValueByLabel(labelText, input.type);
+
+				console.log(`[SabiFill] Filling input "${labelText}" with "${value}"`);
+				input.value = value;
+				this.triggerEvents(input);
+				this.filledFields++;
 				if (value) {
 					console.log(
-						`[SharpFilla] Filling input "${labelText}" with "${value}"`
+						`[SabiFill] Filling input "${labelText}" with "${value}"`
 					);
 					input.value = value;
 					this.triggerEvents(input);
@@ -145,7 +165,7 @@ class FormFiller {
 				const value = this.getValueByLabel(labelText, 'textarea');
 				if (value) {
 					console.log(
-						`[SharpFilla] Filling textarea "${labelText}" with "${value}"`
+						`[SabiFill] Filling textarea "${labelText}" with "${value}"`
 					);
 					textarea.value = value;
 					this.triggerEvents(textarea);
@@ -372,7 +392,7 @@ class FormFiller {
 			}
 
 			if (filled) {
-				console.log(`[SharpFilla] Filled select "${labelText}"`);
+				console.log(`[SabiFill] Filled select "${labelText}"`);
 				this.triggerEvents(select);
 				this.filledFields++;
 			}
@@ -383,10 +403,11 @@ class FormFiller {
 		}
 	}
 
-	private fillTextInputs(): void {
-		const inputs = document.querySelectorAll(
-			'input:not([type="radio"]):not([type="checkbox"]):not([type="file"]):not([data-filled])'
-		);
+	private fillTextInputs(override = false): void {
+		const selector = override
+			? 'input:not([type="radio"]):not([type="checkbox"]):not([type="file"])'
+			: 'input:not([type="radio"]):not([type="checkbox"]):not([type="file"]):not([data-filled])';
+		const inputs = document.querySelectorAll(selector);
 
 		inputs.forEach((input) => {
 			try {
@@ -584,8 +605,9 @@ class FormFiller {
 		return date.toISOString().split('T')[0];
 	}
 
-	private fillSelects(): void {
-		const selects = document.querySelectorAll('select:not([data-filled])');
+	private fillSelects(override = false): void {
+		const selector = override ? 'select' : 'select:not([data-filled])';
+		const selects = document.querySelectorAll(selector);
 
 		selects.forEach((select) => {
 			try {
@@ -637,9 +659,10 @@ class FormFiller {
 		});
 	}
 
-	private async fillCustomSelects(): Promise<void> {
-		console.log('[SharpFilla] Filling custom selects...');
+	private async fillCustomSelects(override = false): Promise<void> {
+		console.log('[SabiFill] Filling custom selects...');
 
+		// const selector = override ? 'select' :
 		// Handle custom select dropdowns
 		const customSelects = document.querySelectorAll(
 			'[role="combobox"]:not([data-filled])'
@@ -654,7 +677,7 @@ class FormFiller {
 					this.getCustomSelectLabel(element)?.toLowerCase() || '';
 				const identifiers = `${ariaLabel} ${labelText}`;
 
-				console.log(`[SharpFilla] Processing custom select: ${identifiers}`);
+				console.log(`[SabiFill] Processing custom select: ${identifiers}`);
 
 				// Click to open the dropdown
 				element.click();
@@ -686,7 +709,7 @@ class FormFiller {
 				if (selected) {
 					this.filledFields++;
 					element.setAttribute('data-filled', 'true');
-					console.log(`[SharpFilla] Filled custom select: ${identifiers}`);
+					console.log(`[SabiFill] Filled custom select: ${identifiers}`);
 				}
 
 				// Click elsewhere to close dropdown
@@ -700,10 +723,18 @@ class FormFiller {
 
 	private getCustomSelectLabel(element: HTMLElement): string {
 		// Find the label in the same container
-		const container = element.closest('div');
+		const container = element.closest('div, label, .form-group, .input-group');
 		if (container) {
-			const label = container.querySelector('label');
-			if (label) return label.textContent || '';
+			// Look for label element in container or as parent
+			const label =
+				container.tagName === 'LABEL'
+					? container
+					: container.querySelector('label');
+
+			if (label) {
+				// Clean up label text by removing any asterisks or extra whitespace
+				return label.textContent?.replace(/\*/g, '').trim() || '';
+			}
 		}
 		return '';
 	}
@@ -711,30 +742,42 @@ class FormFiller {
 	private async selectCustomOption(value: string): Promise<boolean> {
 		await this.delay(100);
 
-		// Look for options in various possible containers
+		// Expanded list of possible selectors for custom dropdown options
 		const selectors = [
 			'[role="option"]',
+			'[role="listbox"] [role="option"]', // For more specific targeting
 			'.option',
 			'.dropdown-item',
 			'li[data-value]',
 			'div[data-value]',
+			'[data-value]', // More generic
 			'[data-testid*="option"]',
+			'[data-testid*="item"]',
 			'.select-option',
 			'.dropdown-option',
+			'.ant-select-item', // Ant Design
+			'.MuiMenuItem-root', // Material UI
+			'.el-select-dropdown__item', // Element UI
+			'.v-list-item', // Vuetify
 		];
 
+		// Try to find and click the matching option
 		for (const selector of selectors) {
 			const options = document.querySelectorAll(selector);
 			for (const option of options) {
-				const optionText = option.textContent?.toLowerCase() || '';
+				const optionText = option.textContent?.toLowerCase().trim() || '';
 				const optionValue =
-					option.getAttribute('data-value')?.toLowerCase() || '';
+					option.getAttribute('data-value')?.toLowerCase().trim() ||
+					option.getAttribute('value')?.toLowerCase().trim() ||
+					option.getAttribute('aria-label')?.toLowerCase().trim() ||
+					'';
 
 				if (
 					optionText.includes(value.toLowerCase()) ||
 					optionValue.includes(value.toLowerCase())
 				) {
 					(option as HTMLElement).click();
+					await this.delay(50); // Small delay after click
 					return true;
 				}
 			}
@@ -744,34 +787,54 @@ class FormFiller {
 	}
 
 	private selectOption(select: HTMLSelectElement, value: string): boolean {
-		const option = Array.from(select.options).find(
+		// First try exact matches
+		const exactMatch = Array.from(select.options).find(
+			(opt) =>
+				opt.value.toLowerCase() === value.toLowerCase() ||
+				opt.text.toLowerCase() === value.toLowerCase()
+		);
+
+		if (exactMatch) {
+			exactMatch.selected = true;
+			return true;
+		}
+
+		// Fall back to partial matches if no exact match found
+		const partialMatch = Array.from(select.options).find(
 			(opt) =>
 				opt.value.toLowerCase().includes(value.toLowerCase()) ||
 				opt.text.toLowerCase().includes(value.toLowerCase())
 		);
-		if (option) {
-			option.selected = true;
+
+		if (partialMatch) {
+			partialMatch.selected = true;
 			return true;
 		}
+
 		return false;
 	}
 
-	private fillRadioButtons(): void {
+	private fillRadioButtons(override = false): void {
+		const selector = override
+			? 'input[type="radio"]'
+			: 'input[type="radio"]:not([data-filled])';
 		const radioGroups = new Map<string, HTMLInputElement[]>();
 
-		document
-			.querySelectorAll('input[type="radio"]:not([data-filled])')
-			.forEach((radio) => {
-				const input = radio as HTMLInputElement;
-				if (!radioGroups.has(input.name)) {
-					radioGroups.set(input.name, []);
-				}
-				radioGroups.get(input.name)!.push(input);
-			});
+		document.querySelectorAll(selector).forEach((radio) => {
+			const input = radio as HTMLInputElement;
+			if (!radioGroups.has(input.name)) {
+				radioGroups.set(input.name, []);
+			}
+			radioGroups.get(input.name)!.push(input);
+		});
 
 		radioGroups.forEach((radios) => {
 			try {
 				if (radios.length > 0) {
+					if (!override && radios.some((r) => r.hasAttribute('data-filled'))) {
+						return;
+					}
+
 					const radioToSelect = radios[0];
 					radioToSelect.checked = true;
 					this.triggerEvents(radioToSelect);
@@ -784,14 +847,22 @@ class FormFiller {
 		});
 	}
 
-	private fillCheckboxes(): void {
-		const checkboxes = document.querySelectorAll(
-			'input[type="checkbox"]:not([data-filled])'
-		);
+	private fillCheckboxes(override = false): void {
+		const selector = override
+			? 'input[type="checkbox"]'
+			: 'input[type="checkbox"]:not([data-filled])';
+
+		const checkboxes = document.querySelectorAll(selector);
 
 		checkboxes.forEach((checkbox) => {
 			try {
 				const input = checkbox as HTMLInputElement;
+
+				// Skip if already filled and not overriding
+				if (!override && input.hasAttribute('data-filled')) {
+					return;
+				}
+
 				const label = this.getAssociatedLabel(input)?.toLowerCase() || '';
 				const identifiers =
 					`${input.id} ${input.name} ${input.value} ${label}`.toLowerCase();
@@ -800,6 +871,8 @@ class FormFiller {
 					identifiers.includes('terms') ||
 					identifiers.includes('agree') ||
 					identifiers.includes('accept') ||
+					identifiers.includes('conditions') ||
+					identifiers.includes('privacy') ||
 					input.required
 				) {
 					input.checked = true;
@@ -813,12 +886,20 @@ class FormFiller {
 		});
 	}
 
-	private fillTextareas(): void {
-		const textareas = document.querySelectorAll('textarea:not([data-filled])');
+	private fillTextareas(override = false): void {
+		const selector = override ? 'textarea' : 'textarea:not([data-filled])';
+
+		const textareas = document.querySelectorAll(selector);
 
 		textareas.forEach((textarea) => {
 			try {
 				const element = textarea as HTMLTextAreaElement;
+
+				// Skip if already filled and not overriding
+				if (!override && element.hasAttribute('data-filled')) {
+					return;
+				}
+
 				const label = this.getAssociatedLabel(element)?.toLowerCase() || '';
 				const identifiers =
 					`${element.id} ${element.name} ${element.placeholder} ${label}`.toLowerCase();
@@ -828,6 +909,13 @@ class FormFiller {
 					value = this.fakeData.address;
 				} else if (identifiers.includes('bio')) {
 					value = this.fakeData.bio;
+				} else if (
+					identifiers.includes('comment') ||
+					identifiers.includes('message')
+				) {
+					value = 'This is a sample comment or message for testing purposes.';
+				} else if (identifiers.includes('description')) {
+					value = 'This is a sample description for testing purposes.';
 				} else {
 					value = 'This is sample text content for testing purposes.';
 				}
@@ -897,14 +985,40 @@ class FormFiller {
 	init(): void {
 		this.browser.runtime.onMessage.addListener(
 			(message: any, sender: any, sendResponse: any) => {
-				if (message === 'fill-form') {
-					this.fillAllInputs()
-						.then(sendResponse)
+				let options: FillOptions = { override: false };
+
+				// if (typeof message === 'object' && message.action === 'fill-form') {
+				// 	// New format: { action: 'fill-form', override: boolean }
+				// 	console.log('checking if object');
+				// 	options = {
+				// 		override: message.override || false,
+				// 	};
+				// } else if (message === 'fill-form') {
+				// 	console.log('checking if not object');
+				// 	// Old string format (maintain backward compatibility)
+				// 	options = { override: false };
+				// }
+
+				// Log the parsed options
+				console.log('[SabiFill] Fill options:', JSON.stringify(options));
+
+				if (message === 'fill-form' || message?.action === 'fill-form') {
+					this.fillAllInputs(options)
+						.then((response) => {
+							// Include the options in the response for debugging
+							const fullResponse: FillResponse = {
+								...response,
+								fillOptions: options,
+							};
+							sendResponse(fullResponse);
+						})
 						.catch((error) => {
 							sendResponse({
 								status: 'error',
 								message: error.message,
 								fieldsFilled: this.filledFields,
+								fillOptions: options,
+								errors: [error.message],
 							});
 						});
 					return true; // Keep message channel open
@@ -917,4 +1031,4 @@ class FormFiller {
 // Initialize
 const formFiller = new FormFiller();
 formFiller.init();
-console.log('[SharpFilla] Content script loaded');
+console.log('[SabiFill] Content script loaded');

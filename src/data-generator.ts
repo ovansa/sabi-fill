@@ -1,4 +1,4 @@
-// fakeDataGenerator.ts
+import { SettingsManager } from './settings';
 
 export interface FakeDataSet {
 	firstName: string;
@@ -323,6 +323,8 @@ class FakeDataGenerator {
 		],
 	};
 
+	private static settingsManager = new SettingsManager();
+
 	private static randomChoice<T>(array: T[]): T {
 		return array[Math.floor(Math.random() * array.length)];
 	}
@@ -431,14 +433,17 @@ class FakeDataGenerator {
 			.join('');
 	}
 
-	public static generate(): FakeDataSet {
+	public static async generate(): Promise<FakeDataSet> {
+		// Get custom settings
+		const customEmailDomain = await this.settingsManager.getEmailDomain();
+		const customPassword = await this.settingsManager.getPassword();
+
 		// Choose gender first
 		const gender = this.randomChoice(['male', 'female']);
 		const firstName = this.randomChoice(this.DATA_POOLS.firstNames[gender]);
 		const lastName = this.randomChoice(this.DATA_POOLS.lastNames);
 
-		// Generate consistent data based on names
-		const emailDomain = this.randomChoice(this.DATA_POOLS.domains);
+		// Generate email with custom domain or fallback to default
 		const workDomain = this.randomChoice(this.DATA_POOLS.workDomains);
 		const emailPrefix = `${firstName.toLowerCase()}.${lastName.toLowerCase()}`;
 		const username = `${firstName.toLowerCase()}${lastName.toLowerCase()}${this.randomInt(
@@ -447,7 +452,7 @@ class FakeDataGenerator {
 		)}`;
 
 		// Generate address
-		const country = 'Nigeria'; // Default to Nigeria as per original
+		const country = 'Nigeria';
 		const streetNumber = this.randomInt(1, 9999);
 		const streetName = this.randomChoice(this.DATA_POOLS.streetNames);
 		const streetType = this.randomChoice(this.DATA_POOLS.streetTypes);
@@ -487,7 +492,9 @@ class FakeDataGenerator {
 		const salary = this.generateSalary();
 		const bio = this.randomChoice(this.DATA_POOLS.bios);
 		const licenseNumber = this.generateLicenseNumber();
-		const password = this.generatePassword();
+
+		// Use custom password if set, otherwise generate new one
+		const password = customPassword || this.generatePassword();
 
 		// Generate URLs
 		const website = `https://${firstName.toLowerCase()}${lastName.toLowerCase()}.dev`;
@@ -501,7 +508,7 @@ class FakeDataGenerator {
 		return {
 			firstName,
 			lastName,
-			email: `${emailPrefix}@${emailDomain}`,
+			email: `${emailPrefix}@${customEmailDomain}`, // Use custom domain
 			workEmail: `${emailPrefix}@${workDomain}`,
 			phone,
 			emergencyPhone,
@@ -512,7 +519,7 @@ class FakeDataGenerator {
 			city,
 			zipCode,
 			username,
-			password,
+			password, // Use custom password if set
 			ccNumber,
 			ccNumberFormatted,
 			ccName,
@@ -528,7 +535,7 @@ class FakeDataGenerator {
 			bio,
 			gender,
 			country,
-			state: city, // Using city as state for Nigeria
+			state: city,
 			dateOfBirth,
 			licenseNumber,
 			address: fullAddress,
