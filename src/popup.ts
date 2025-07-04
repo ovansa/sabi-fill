@@ -25,6 +25,7 @@ interface PopupUI {
 	customPasswordInput: HTMLInputElement;
 	saveSettingsButton: HTMLElement;
 	backToMainButton: HTMLElement;
+	saveText: HTMLElement;
 }
 
 class PopupController {
@@ -46,6 +47,7 @@ class PopupController {
 			)! as HTMLInputElement,
 			saveSettingsButton: document.getElementById('save-settings')!,
 			backToMainButton: document.getElementById('back-to-main')!,
+			saveText: document.querySelector('.save-text') as HTMLElement,
 		};
 	}
 
@@ -125,7 +127,7 @@ class PopupController {
 			button.style.backgroundColor = '';
 			button.removeAttribute('disabled');
 			this.updateStatus('Ready to fill forms', 'ready');
-		}, 3000);
+		}, 1000);
 	}
 
 	private showSettings(): void {
@@ -159,6 +161,7 @@ class PopupController {
 
 	private async saveSettings(): Promise<void> {
 		const saveButton = this.ui.saveSettingsButton;
+		const saveText = this.ui.saveText;
 		const emailDomain = this.ui.emailDomainInput.value.trim();
 		const customPassword = this.ui.customPasswordInput.value.trim();
 
@@ -174,11 +177,13 @@ class PopupController {
 			return;
 		}
 
+		// Set loading state and allow UI to update
 		saveButton.setAttribute('disabled', 'true');
-		saveButton.textContent = 'Saving...';
+		saveButton.classList.add('Saving...');
+		saveText.innerHTML = '<div class="spinner"></div>';
 
 		try {
-			const settings: Settings = {
+			const settings = {
 				customEmailDomain: emailDomain,
 				customPassword: customPassword,
 			};
@@ -187,19 +192,31 @@ class PopupController {
 				[SABI_FILL_STORAGE_KEY]: settings,
 			});
 
-			this.updateStatus('✅ Settings saved!', 'success');
-			saveButton.textContent = '💾 Save Settings';
+			// Success state
+			saveButton.classList.remove('saving');
+			saveButton.classList.add('success');
+			saveText.innerHTML = '✓ Saved';
 
-			// Go back to main panel after successful save
+			// Go back to main after delay
 			setTimeout(() => {
 				this.showMain();
-			}, 1500);
+				// Reset button state
+				saveButton.classList.remove('success');
+				saveText.textContent = 'Save';
+				saveButton.removeAttribute('disabled');
+			}, 1200);
 		} catch (error) {
 			console.error('[SabiFill] Failed to save settings:', error);
-			this.updateStatus('❌ Failed to save settings', 'error');
-			saveButton.textContent = '💾 Save Settings';
-		} finally {
-			saveButton.removeAttribute('disabled');
+
+			// Error state
+			saveButton.classList.remove('saving');
+			saveText.textContent = 'Error';
+
+			// Reset after delay
+			setTimeout(() => {
+				saveText.textContent = 'Save';
+				saveButton.removeAttribute('disabled');
+			}, 2000);
 		}
 	}
 

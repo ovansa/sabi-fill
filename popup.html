@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 	<head>
 		<meta charset="utf-8" />
@@ -10,7 +9,7 @@
 			}
 
 			body {
-				width: 220px;
+				width: 300px;
 				min-height: 280px;
 				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 					sans-serif;
@@ -143,36 +142,44 @@
 
 			.settings-panel {
 				margin-top: 12px;
-				padding: 10px;
+				padding: 16px;
 				background: #fff;
 				border: 1px solid #e9ecef;
+				border-radius: 4px;
 				display: none;
 			}
 
 			.settings-panel h3 {
-				font-size: 11px;
-				margin-bottom: 8px;
+				font-size: 13px;
+				margin-bottom: 16px;
 				color: #333;
+				font-weight: 500;
 			}
 
 			.form-group {
-				margin-bottom: 8px;
+				margin-bottom: 16px;
+			}
+
+			.form-group:last-of-type {
+				margin-bottom: 20px;
 			}
 
 			.form-group label {
 				display: block;
-				font-size: 10px;
-				margin-bottom: 3px;
+				font-size: 11px;
+				margin-bottom: 4px;
 				color: #666;
+				font-weight: 500;
 			}
 
 			.form-group input {
 				width: 100%;
-				padding: 6px;
-				font-size: 11px;
+				padding: 8px 10px;
+				font-size: 12px;
 				border: 1px solid #e9ecef;
-				border-radius: 3px;
+				border-radius: 4px;
 				background: #fff;
+				transition: border-color 0.2s ease;
 			}
 
 			.form-group input:focus {
@@ -184,16 +191,33 @@
 				color: #999;
 			}
 
+			.help-text {
+				font-size: 10px;
+				color: #999;
+				margin-top: 4px;
+			}
+
+			.actions {
+				display: flex;
+				gap: 8px;
+				margin-top: 16px;
+			}
+
 			.save-button {
-				width: 100%;
-				padding: 6px;
+				flex: 1;
+				padding: 8px 12px;
 				background: #28a745;
 				color: white;
 				border: none;
-				font-size: 10px;
+				font-size: 11px;
+				font-weight: 500;
 				cursor: pointer;
-				border-radius: 3px;
-				margin-top: 5px;
+				border-radius: 4px;
+				transition: all 0.2s ease;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 4px;
 			}
 
 			.save-button:hover {
@@ -201,8 +225,47 @@
 			}
 
 			.save-button:disabled {
-				opacity: 0.6;
+				background: #6c757d;
 				cursor: not-allowed;
+			}
+
+			.save-button.saving {
+				background: #ffc107;
+				color: #212529;
+			}
+
+			.save-button.success {
+				background: #28a745;
+				animation: success-pulse 0.3s ease;
+			}
+
+			@keyframes success-pulse {
+				0% {
+					transform: scale(1);
+				}
+				50% {
+					transform: scale(1.05);
+				}
+				100% {
+					transform: scale(1);
+				}
+			}
+
+			.back-button {
+				flex: 1;
+				padding: 8px 12px;
+				background: #6c757d;
+				color: white;
+				border: none;
+				font-size: 11px;
+				font-weight: 500;
+				cursor: pointer;
+				border-radius: 4px;
+				transition: background-color 0.2s ease;
+			}
+
+			.back-button:hover {
+				background: #5a6268;
 			}
 
 			.version {
@@ -235,26 +298,42 @@
 				vertical-align: middle;
 			}
 
-			.help-text {
-				font-size: 9px;
-				color: #999;
-				margin-top: 2px;
+			.spinner {
+				width: 12px;
+				height: 12px;
+				border: 2px solid transparent;
+				border-top: 2px solid currentColor;
+				border-radius: 50%;
+				animation: spin 1s linear infinite;
 			}
 
-			.back-button {
-				width: 100%;
-				padding: 6px;
-				background: #6c757d;
-				color: white;
-				border: none;
-				font-size: 10px;
-				cursor: pointer;
-				border-radius: 3px;
-				margin-top: 5px;
+			@keyframes spin {
+				0% {
+					transform: rotate(0deg);
+				}
+				100% {
+					transform: rotate(360deg);
+				}
 			}
 
-			.back-button:hover {
-				background: #5a6268;
+			.checkmark {
+				width: 12px;
+				height: 12px;
+				border-radius: 50%;
+				display: inline-block;
+				stroke-width: 2;
+				stroke: currentColor;
+				stroke-miterlimit: 10;
+				animation: checkmark 0.6s ease-in-out;
+			}
+
+			@keyframes checkmark {
+				0% {
+					stroke-dasharray: 0 50;
+				}
+				100% {
+					stroke-dasharray: 50 0;
+				}
 			}
 		</style>
 	</head>
@@ -299,10 +378,10 @@
 			</div>
 
 			<div class="settings-panel" id="settings-panel">
-				<h3>⚙️ Custom Settings</h3>
+				<h3>Settings</h3>
 
 				<div class="form-group">
-					<label for="email-domain">Email Domain:</label>
+					<label for="email-domain">Email Domain</label>
 					<input
 						type="text"
 						id="email-domain"
@@ -313,9 +392,9 @@
 				</div>
 
 				<div class="form-group">
-					<label for="custom-password">Custom Password:</label>
+					<label for="custom-password">Custom Password</label>
 					<input
-						type="password"
+						type="text"
 						id="custom-password"
 						placeholder="Leave blank for random"
 					/>
@@ -324,12 +403,15 @@
 					</div>
 				</div>
 
-				<button id="save-settings" class="save-button">💾 Save Settings</button>
-
-				<button id="back-to-main" class="back-button">← Back</button>
+				<div class="actions">
+					<button id="back-to-main" class="back-button">Cancel</button>
+					<button id="save-settings" class="save-button">
+						<span class="save-text">Save</span>
+					</button>
+				</div>
 			</div>
 
-			<div class="version">v1.0 - Made with ❤️ for developers</div>
+			<div class="version">v1.0 – Because filling forms is boring 💤</div>
 		</div>
 
 		<script src="popup.js"></script>
